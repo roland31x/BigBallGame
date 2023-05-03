@@ -16,8 +16,8 @@ namespace BigBallGame
     {
         public static List<Ball> Balls = new List<Ball>();
         static readonly Random rng = new Random();
-        public double DX { get; set; }
-        public double DY { get; set; }
+        public int DX { get; set; }
+        public int DY { get; set; }
         public int Speed { get; set; }
         public int Radius { get; set; }
         public bool IsAlive { get; set; }
@@ -109,9 +109,8 @@ namespace BigBallGame
             {
                 Height = Radius * 2,
                 Width = Radius * 2,
-                Fill = new SolidColorBrush(Color.FromRgb((byte)rng.Next(10, 255), (byte)rng.Next(10, 255), (byte)rng.Next(10, 255))),
-            };
-                     
+                Fill = new SolidColorBrush(Color.FromRgb((byte)rng.Next(10, 250), (byte)rng.Next(10, 250), (byte)rng.Next(10, 250))),
+            };                   
         }
         async Task IntersectionCheck()
         {
@@ -180,6 +179,7 @@ namespace BigBallGame
                 b.Body.Width = b.Radius * 2;
                 parent.Children.Remove(Body);
             }
+
             double p = Radius + b.Radius;
             double thisp = (Radius / p) * 255;
             double thatp = (b.Radius / p) * 255;
@@ -196,14 +196,15 @@ namespace BigBallGame
             b.Body.Fill = new SolidColorBrush(result);
             Body.Fill = new SolidColorBrush(result);
         }
-        void RepellentInteraction(RepellentBall b)
+        async void RepellentInteraction(RepellentBall b)
         {
             DX *= -1;
             DY *= -1;
             b.Body.Fill = Body.Fill;
-            while (DoIntersect(b))
+            while(DoIntersect(b))
             {
                 Location = new Point(Location.X + b.DX, Location.Y + b.DY);
+                await Task.Delay(10);
             }                        
         }
         void MonsterBallInteraction(MonsterBall b)
