@@ -8,13 +8,13 @@
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize" Background="Black"
         WindowStyle="None"
-        Title="MainWindow" Height="800" Width="800">
+        Title="MainWindow" Height="800" Width="1200">
     <Grid>
         <Canvas>
-            <Canvas x:Name="MainCanvas" Background="White" Height="726" Width="726" Canvas.Left="37" Canvas.Top="29">
+            <Canvas x:Name="MainCanvas" Background="White" Height="760" Width="1180" Canvas.Left="10" Canvas.Top="29" HorizontalAlignment="Center" VerticalAlignment="Top">
 
             </Canvas>
-            <Button Height="22" Width="96" HorizontalAlignment="Center" Canvas.Left="352" VerticalAlignment="Top" Canvas.Top="2" Content="Play" Click="Button_Click"></Button>
+            <Button Height="22" Width="96" HorizontalAlignment="Center" Canvas.Left="552" VerticalAlignment="Top" Content="Play" Click="Button_Click" Canvas.Top="2"/>
         </Canvas>
 
     </Grid>

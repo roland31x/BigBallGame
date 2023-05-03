@@ -29,6 +29,9 @@ namespace BigBallGame
         public abstract void InteractWith(Ball other);
         public void Spawn(Canvas canvas)
         {
+            double x = rng.Next(Radius, (int)canvas.Width - Radius);
+            double y = rng.Next(Radius, (int)canvas.Height - Radius);
+            Location = new Point(x, y);
             canvas.Children.Add(Body);
             Canvas.SetLeft(Body, Location.X - Radius);
             Canvas.SetTop(Body, Location.Y - Radius);
@@ -60,7 +63,7 @@ namespace BigBallGame
             {
                 x = Location.X + DX;
                 y = Location.Y + DY;
-                if (x >= 726 - Radius || x <= Radius)
+                if (x >= parent.Width - Radius || x <= Radius)
                 {
                     DX *= -1;
                     if(x <= Radius)
@@ -69,10 +72,10 @@ namespace BigBallGame
                     }
                     else
                     {
-                        x = 725 - Radius;
+                        x = parent.Width - Radius;
                     }
                 }
-                if (y >= 726 - Radius || y <= Radius)
+                if (y >= parent.Height - Radius || y <= Radius)
                 {
                     DY *= -1;
                     if (y <= Radius)
@@ -81,7 +84,7 @@ namespace BigBallGame
                     }
                     else
                     {
-                        y = 725 - Radius;
+                        y = parent.Height - Radius;
                     }
                 }
                 Location = new Point(x, y);
@@ -108,9 +111,7 @@ namespace BigBallGame
                 Width = Radius * 2,
                 Fill = new SolidColorBrush(Color.FromRgb((byte)rng.Next(10, 255), (byte)rng.Next(10, 255), (byte)rng.Next(10, 255))),
             };
-            int x = rng.Next(Radius, 726 - Radius);
-            int y = rng.Next(Radius, 726 - Radius);
-            Location = new Point(x, y);          
+                     
         }
         async Task IntersectionCheck()
         {
@@ -179,6 +180,11 @@ namespace BigBallGame
                 b.Body.Width = b.Radius * 2;
                 parent.Children.Remove(Body);
             }
+            //Color c1 = (b.Body.Fill as SolidColorBrush).Color;
+            //Color c2 = (Body.Fill as SolidColorBrush).Color;
+            //Color result = Color.Add(c1, c2);
+            //b.Body.Fill = new SolidColorBrush(result);
+            //Body.Fill = new SolidColorBrush(result);
         }
         void RepellentInteraction(RepellentBall b)
         {
