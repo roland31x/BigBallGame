@@ -61,10 +61,14 @@ namespace BigBallGame
             else if (!Started)
             {
                 (sender as Button).IsEnabled = false;
-                foreach (Ball b in Ball.Balls)
-                {
-                    b.Move();
-                }                             
+                await Ball.PlayGame();
+
+                MessageBox.Show("Game finished.");
+                (sender as Button).IsEnabled = true;
+                MainCanvas.Children.Clear();
+                Ball.Balls.Clear();
+                Spawned = false;
+                Started = false;
             }
         }
     }

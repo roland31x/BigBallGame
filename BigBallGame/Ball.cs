@@ -24,6 +24,8 @@ namespace BigBallGame
         public Ellipse Body { get; set; }
         protected Canvas parent { get; set; }
         public Point Location { get; set; }
+        
+        static int AliveRegularBalls { get { return Balls.Where(x => (x.GetType() == typeof(RegularBall)) && (x.IsAlive)).Count(); } }
         public abstract void InteractWith(Ball other);
         public void Spawn(Canvas canvas)
         {
@@ -33,7 +35,22 @@ namespace BigBallGame
             parent = canvas;
 
         }
-        public async void Move()
+        public static async Task PlayGame()
+        {
+            foreach (Ball b in Balls)
+            {
+                if(b.parent == null)
+                {
+                    throw new Exception("Ball wasn't spwaned");
+                }
+                b.Move();
+            }
+            while(AliveRegularBalls > 0)
+            {
+                await Task.Delay(100);
+            }
+        }
+        async void Move()
         {
             double x = Location.X;
             double y = Location.Y;
@@ -178,7 +195,6 @@ namespace BigBallGame
             b.Radius += Radius;
             b.Body.Height = b.Radius * 2;
             b.Body.Width = b.Radius * 2;
-            //b.Location = new Point(b.Location.X - Radius, b.Location.Y - Radius);
             IsAlive = false;
             parent.Children.Remove(this.Body);
         }
