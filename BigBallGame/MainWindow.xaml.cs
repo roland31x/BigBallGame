@@ -20,7 +20,8 @@ namespace BigBallGame
     /// </summary>
     public partial class MainWindow : Window
     {
-        bool SP = false;
+        bool Started = false;
+        bool Spawned = false;
         public MainWindow()
         {
             InitializeComponent();
@@ -37,9 +38,9 @@ namespace BigBallGame
 
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
-            if (!SP)
+            if (!Spawned)
             {
-                SP = true;
+                Spawned = true;
                 for (int i = 0; i < 10; i++)
                 {
                     Ball b = new RegularBall();
@@ -47,15 +48,19 @@ namespace BigBallGame
                 }
                 for (int i = 0; i < 2; i++)
                 {
-                    RepellentBall b = new RepellentBall();
+                    Ball b = new RepellentBall();
                     b.Spawn(MainCanvas);
                 }
-                //MonsterBall ba = new MonsterBall();
-                // ba.Spawn(MainCanvas);
+                for (int i = 0; i < 2; i++)
+                {
+                    Ball b = new MonsterBall();
+                    b.Spawn(MainCanvas);
+                }
                 await Task.Delay(100);
             }           
-            else
+            else if (!Started)
             {
+                (sender as Button).IsEnabled = false;
                 foreach (Ball b in Ball.Balls)
                 {
                     b.Move();

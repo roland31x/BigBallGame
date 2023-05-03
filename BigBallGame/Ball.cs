@@ -93,8 +93,7 @@ namespace BigBallGame
             };
             int x = rng.Next(Radius, 726 - Radius);
             int y = rng.Next(Radius, 726 - Radius);
-            Location = new Point(x, y);
-           
+            Location = new Point(x, y);          
         }
         async Task IntersectionCheck()
         {
@@ -177,8 +176,9 @@ namespace BigBallGame
         void MonsterBallInteraction(MonsterBall b)
         {
             b.Radius += Radius;
-            b.Body.Height = b.Radius;
-            b.Body.Width = b.Radius;
+            b.Body.Height = b.Radius * 2;
+            b.Body.Width = b.Radius * 2;
+            //b.Location = new Point(b.Location.X - Radius, b.Location.Y - Radius);
             IsAlive = false;
             parent.Children.Remove(this.Body);
         }
@@ -189,9 +189,36 @@ namespace BigBallGame
         {
 
         }
-        public override void InteractWith(Ball other)
+        public override void InteractWith(Ball b)
         {
+            if (b.GetType() == typeof(RegularBall))
+            {
+                return;
+            }
+            else if (b.GetType() == typeof(RepellentBall))
+            {
+                RepellentInteraction((RepellentBall)b);
+            }
+            else if (b.GetType() == typeof(MonsterBall))
+            {
+                MonsterBallInteraction((MonsterBall)b);
+            }
+        }
 
+        private void MonsterBallInteraction(MonsterBall b)
+        {
+            Radius /= 2;
+            if(Radius < 1)
+            {
+                IsAlive = false;
+            }
+            Body.Height = Radius * 2;
+            Body.Width = Radius * 2;
+        }
+
+        void RepellentInteraction(RepellentBall b)
+        {
+            (Body.Fill, b.Body.Fill) = (b.Body.Fill, Body.Fill);
         }
     }
     public class MonsterBall : Ball
