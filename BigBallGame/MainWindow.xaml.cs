@@ -41,17 +41,17 @@ namespace BigBallGame
             if (!Spawned)
             {
                 Spawned = true;
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < 30; i++)
                 {
                     Ball b = new RegularBall();
                     b.Spawn(MainCanvas);
                 }
-                for (int i = 0; i < 2; i++)
+                for (int i = 0; i < 5; i++)
                 {
                     Ball b = new RepellentBall();
                     b.Spawn(MainCanvas);
                 }
-                for (int i = 0; i < 2; i++)
+                for (int i = 0; i < 1; i++)
                 {
                     Ball b = new MonsterBall();
                     b.Spawn(MainCanvas);

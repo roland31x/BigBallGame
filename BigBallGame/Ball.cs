@@ -180,11 +180,21 @@ namespace BigBallGame
                 b.Body.Width = b.Radius * 2;
                 parent.Children.Remove(Body);
             }
-            //Color c1 = (b.Body.Fill as SolidColorBrush).Color;
-            //Color c2 = (Body.Fill as SolidColorBrush).Color;
-            //Color result = Color.Add(c1, c2);
-            //b.Body.Fill = new SolidColorBrush(result);
-            //Body.Fill = new SolidColorBrush(result);
+            double p = Radius + b.Radius;
+            double thisp = (Radius / p) * 255;
+            double thatp = (b.Radius / p) * 255;
+
+            Color c1 = (b.Body.Fill as SolidColorBrush).Color;
+            c1.R = (byte)((double)c1.R * thatp);
+            c1.G = (byte)((double)c1.G * thatp);
+            c1.B = (byte)((double)c1.B * thatp);
+            Color c2 = (Body.Fill as SolidColorBrush).Color;
+            c2.R = (byte)((double)c2.R * thisp);
+            c2.G = (byte)((double)c2.G * thisp);
+            c2.B = (byte)((double)c2.B * thisp);
+            Color result = Color.Add(c1, c2);
+            b.Body.Fill = new SolidColorBrush(result);
+            Body.Fill = new SolidColorBrush(result);
         }
         void RepellentInteraction(RepellentBall b)
         {
