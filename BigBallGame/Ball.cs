@@ -15,6 +15,7 @@ namespace BigBallGame
     public abstract class Ball
     {
         public static List<Ball> Balls = new List<Ball>();
+        static int AliveRegularBalls { get { return Balls.Where(x => (x.GetType() == typeof(RegularBall)) && (x.IsAlive)).Count(); } }
         static readonly Random rng = new Random();
         public int DX { get; set; }
         public int DY { get; set; }
@@ -24,8 +25,21 @@ namespace BigBallGame
         public Ellipse Body { get; set; }
         protected Canvas parent { get; set; }
         public Point Location { get; set; }
-        
-        static int AliveRegularBalls { get { return Balls.Where(x => (x.GetType() == typeof(RegularBall)) && (x.IsAlive)).Count(); } }
+        protected Ball()
+        {
+            IsAlive = true;
+            Balls.Add(this);
+            Radius = rng.Next(5, 20);
+            Speed = rng.Next(1, 15);
+            DX = rng.Next(-Speed, Speed);
+            DY = rng.Next(-Speed, Speed);
+            Body = new Ellipse()
+            {
+                Height = Radius * 2,
+                Width = Radius * 2,
+                Fill = new SolidColorBrush(Color.FromRgb((byte)rng.Next(10, 250), (byte)rng.Next(10, 250), (byte)rng.Next(10, 250))),
+            };
+        }
         public abstract void InteractWith(Ball other);
         public void Spawn(Canvas canvas)
         {
@@ -46,72 +60,59 @@ namespace BigBallGame
                 {
                     throw new Exception("Ball wasn't spwaned");
                 }
-                b.Move();
+                b.BeginMove();
             }
             while(AliveRegularBalls > 0)
             {
                 await Task.Delay(100);
             }
         }
-        async void Move()
+        public async void BeginMove()
         {
-            double x = Location.X;
-            double y = Location.Y;
             Stopwatch sw = new Stopwatch();
             sw.Start();
             while(IsAlive)
             {
-                x = Location.X + DX;
-                y = Location.Y + DY;
-                if (x >= parent.Width - Radius || x <= Radius)
-                {
-                    DX *= -1;
-                    if(x <= Radius)
-                    {
-                        x = Radius + 1;
-                    }
-                    else
-                    {
-                        x = parent.Width - Radius;
-                    }
-                }
-                if (y >= parent.Height - Radius || y <= Radius)
-                {
-                    DY *= -1;
-                    if (y <= Radius)
-                    {
-                        y = Radius + 1;
-                    }
-                    else
-                    {
-                        y = parent.Height - Radius;
-                    }
-                }
-                Location = new Point(x, y);
+                Move();
                 await IntersectionCheck();
                 Canvas.SetLeft(Body, Location.X - Radius);
                 Canvas.SetTop(Body, Location.Y - Radius);
-
                 await Task.Delay(10);
             }
-            sw.Stop();
-                       
+            sw.Stop();                      
         }
-        protected Ball()
+        protected void Move()
         {
-            IsAlive = true;
-            Balls.Add(this);
-            Radius = rng.Next(5, 20);
-            Speed = rng.Next(1, 10);
-            DX = rng.Next(-Speed, Speed);
-            DY = rng.Next(-Speed, Speed);            
-            Body = new Ellipse()
+            double x, y;
+            x = Location.X + DX;
+            y = Location.Y + DY;
+            if (x >= parent.Width - Radius || x <= Radius)
             {
-                Height = Radius * 2,
-                Width = Radius * 2,
-                Fill = new SolidColorBrush(Color.FromRgb((byte)rng.Next(10, 250), (byte)rng.Next(10, 250), (byte)rng.Next(10, 250))),
-            };                   
+                DX *= -1;
+                if (x <= Radius)
+                {
+                    x = Radius + 1;
+                }
+                else
+                {
+                    x = parent.Width - Radius;
+                }
+            }
+            if (y >= parent.Height - Radius || y <= Radius)
+            {
+                DY *= -1;
+                if (y <= Radius)
+                {
+                    y = Radius + 1;
+                }
+                else
+                {
+                    y = parent.Height - Radius;
+                }
+            }
+            Location = new Point(x, y);
         }
+       
         async Task IntersectionCheck()
         {
             foreach(Ball b in Balls)
@@ -180,19 +181,19 @@ namespace BigBallGame
                 parent.Children.Remove(Body);
             }
 
-            double p = Radius + b.Radius;
-            double thisp = (Radius / p) * 255;
-            double thatp = (b.Radius / p) * 255;
+            int p = Radius + b.Radius;
+
 
             Color c1 = (b.Body.Fill as SolidColorBrush).Color;
-            c1.R = (byte)((double)c1.R * thatp);
-            c1.G = (byte)((double)c1.G * thatp);
-            c1.B = (byte)((double)c1.B * thatp);
             Color c2 = (Body.Fill as SolidColorBrush).Color;
-            c2.R = (byte)((double)c2.R * thisp);
-            c2.G = (byte)((double)c2.G * thisp);
-            c2.B = (byte)((double)c2.B * thisp);
             Color result = Color.Add(c1, c2);
+            int resR = ((c1.R * b.Radius + c2.R * Radius)) / p;
+            result.R = (byte)resR;
+            int resG = ((c1.G * b.Radius + c2.G * Radius)) / p;
+            result.G = (byte)resG; 
+            int resB = ((c1.B * b.Radius + c2.B * Radius)) / p;
+            result.B = (byte)resB;
+
             b.Body.Fill = new SolidColorBrush(result);
             Body.Fill = new SolidColorBrush(result);
         }

@@ -51,11 +51,11 @@ namespace BigBallGame
                     Ball b = new RepellentBall();
                     b.Spawn(MainCanvas);
                 }
-                for (int i = 0; i < 1; i++)
-                {
-                    Ball b = new MonsterBall();
-                    b.Spawn(MainCanvas);
-                }
+                //for (int i = 0; i < 1; i++)
+                //{
+                //    Ball b = new MonsterBall();
+                //    b.Spawn(MainCanvas);
+                //}
                 await Task.Delay(100);
             }           
             else if (!Started)
