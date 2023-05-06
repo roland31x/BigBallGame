@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BigBallGame.Balls;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -60,13 +61,12 @@ namespace BigBallGame
             }           
             else if (!Started)
             {
-                (sender as Button).IsEnabled = false;
-                await Ball.PlayGame();
+                (sender as Button)!.IsEnabled = false;
+                await BallGame.PlayGame();
 
                 MessageBox.Show("Game finished.");
-                (sender as Button).IsEnabled = true;
-                MainCanvas.Children.Clear();
-                Ball.Balls.Clear();
+                (sender as Button)!.IsEnabled = true;
+                BallGame.Reset();
                 Spawned = false;
                 Started = false;
             }

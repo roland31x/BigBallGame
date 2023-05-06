@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BigBallGame.Balls;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -9,84 +10,130 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace BigBallGame
 {
-    public abstract class Ball
+    public abstract class Ball : IBall
     {
-        public static List<Ball> Balls = new List<Ball>();
-        static int AliveRegularBalls { get { return Balls.Where(x => (x.GetType() == typeof(RegularBall)) && (x.IsAlive)).Count(); } }
         static readonly Random rng = new Random();
         public int DX { get; set; }
         public int DY { get; set; }
         public int Speed { get; set; }
-        public int Radius { get; set; }
-        public bool IsAlive { get; set; }
+        int _radius;
+        public int Radius 
+        { 
+            get 
+            { 
+                return _radius; 
+            } 
+            set 
+            { 
+                _radius = value;
+
+                // UI stuff
+                Body.Width = _radius * 2; 
+                Body.Height = _radius * 2; 
+            } 
+        }
+        bool _alive;
+        public bool IsAlive 
+        { 
+            get 
+            { 
+                return _alive; 
+            } 
+            set 
+            { 
+                _alive = value;
+
+                // UI stuff
+                if (!_alive) 
+                { 
+                    Parent!.Children.Remove(Body);
+                } 
+            } 
+        }
+        // UI stuff for wpf
         public Ellipse Body { get; set; }
-        protected Canvas parent { get; set; }
-        public Point Location { get; set; }
+        public Canvas? Parent { get; set; }
+        //
+
+        Point _location;
+        public Point Location 
+        { 
+            get 
+            { 
+                return _location; 
+            } 
+            set 
+            { 
+                _location = value;
+
+                // UI update movement;
+                Canvas.SetTop(Body, _location.Y - _radius); 
+                Canvas.SetLeft(Body, _location.X - _radius); 
+            } 
+        }
+        public Color _color;
+        public Color BColor 
+        { 
+            get 
+            { 
+                return _color; 
+            }
+            set
+            {
+                _color = value;
+
+                // UI stuff
+                Body.Fill = new SolidColorBrush(_color);
+            }
+        }
+
         protected Ball()
         {
+            Body = new Ellipse();
+            BColor = Color.FromRgb((byte)rng.Next(10, 250), (byte)rng.Next(10, 250), (byte)rng.Next(10, 250));
             IsAlive = true;
-            Balls.Add(this);
+            BallGame.Balls.Add(this);
             Radius = rng.Next(5, 20);
             Speed = rng.Next(1, 15);
             DX = rng.Next(-Speed, Speed);
-            DY = rng.Next(-Speed, Speed);
-            Body = new Ellipse()
-            {
-                Height = Radius * 2,
-                Width = Radius * 2,
-                Fill = new SolidColorBrush(Color.FromRgb((byte)rng.Next(10, 250), (byte)rng.Next(10, 250), (byte)rng.Next(10, 250))),
-            };
+            DY = rng.Next(-Speed, Speed);            
         }
-        public abstract void InteractWith(Ball other);
+        public abstract Task InteractWith(Ball other);
         public void Spawn(Canvas canvas)
         {
             double x = rng.Next(Radius, (int)canvas.Width - Radius);
             double y = rng.Next(Radius, (int)canvas.Height - Radius);
-            Location = new Point(x, y);
             canvas.Children.Add(Body);
-            Canvas.SetLeft(Body, Location.X - Radius);
-            Canvas.SetTop(Body, Location.Y - Radius);
-            parent = canvas;
+            Location = new Point(x, y);         
+            Parent = canvas;
+        }
+        //public void Spawn(int XMax, int YMax) // for console app if needed
+        //{
+        //    double x = rng.Next(Radius, XMax - Radius);
+        //    double y = rng.Next(Radius, YMax - Radius);
+        //    Location = new Point(x, y);
 
-        }
-        public static async Task PlayGame()
-        {
-            foreach (Ball b in Balls)
-            {
-                if(b.parent == null)
-                {
-                    throw new Exception("Ball wasn't spwaned");
-                }
-                b.BeginMove();
-            }
-            while(AliveRegularBalls > 0)
-            {
-                await Task.Delay(100);
-            }
-        }
+        //    throw new NotImplementedException(); // because properties set stuff on parent canvas which will be null, code needs to be changed slightly in order for this to work, and console logs need to be added.
+        //}
+
         public async void BeginMove()
         {
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
             while(IsAlive)
             {
-                Move();
-                await IntersectionCheck();
-                Canvas.SetLeft(Body, Location.X - Radius);
-                Canvas.SetTop(Body, Location.Y - Radius);
+                Move();                              
                 await Task.Delay(10);
-            }
-            sw.Stop();                      
+            }                    
         }
         protected void Move()
         {
             double x, y;
             x = Location.X + DX;
             y = Location.Y + DY;
-            if (x >= parent.Width - Radius || x <= Radius)
+            if (x >= Parent!.Width - Radius || x <= Radius)
             {
                 DX *= -1;
                 if (x <= Radius)
@@ -95,10 +142,10 @@ namespace BigBallGame
                 }
                 else
                 {
-                    x = parent.Width - Radius;
+                    x = Parent!.Width - Radius;
                 }
             }
-            if (y >= parent.Height - Radius || y <= Radius)
+            if (y >= Parent!.Height - Radius || y <= Radius)
             {
                 DY *= -1;
                 if (y <= Radius)
@@ -107,27 +154,12 @@ namespace BigBallGame
                 }
                 else
                 {
-                    y = parent.Height - Radius;
+                    y = Parent!.Height - Radius;
                 }
             }
             Location = new Point(x, y);
         }
-       
-        async Task IntersectionCheck()
-        {
-            foreach(Ball b in Balls)
-            {
-                if(b == this || !b.IsAlive)
-                {
-                    continue;
-                }
-                if (this.DoIntersect(b))
-                {
-                    this.InteractWith(b);
-                }               
-            }
-        }
-        protected bool DoIntersect(Ball b)
+        public bool DoIntersect(Ball b)
         {
             double radiusdist = Radius + b.Radius;
             if (radiusdist > GetDist(b))
@@ -139,134 +171,6 @@ namespace BigBallGame
         protected double GetDist(Ball other)
         {
             return Math.Sqrt((Location.X - other.Location.X) * (Location.X - other.Location.X) + (Location.Y - other.Location.Y) * (Location.Y - other.Location.Y));
-        }
-    }
-    public class RegularBall : Ball
-    {
-        public RegularBall() : base()
-        {
-
-        }
-        public override void InteractWith(Ball b)
-        {
-            if(b.GetType() == typeof(RegularBall))
-            {
-                RegularInteraction((RegularBall)b);
-            }
-            else if(b.GetType() == typeof(RepellentBall))
-            {
-                RepellentInteraction((RepellentBall)b);
-            }
-            else if(b.GetType() == typeof(MonsterBall))
-            {
-                MonsterBallInteraction((MonsterBall)b);
-            }
-        }
-        void RegularInteraction(RegularBall b)
-        {
-            if (Radius > b.Radius)
-            {
-                Radius += b.Radius;
-                b.IsAlive = false;
-                Body.Height = Radius * 2;
-                Body.Width = Radius * 2;
-                parent.Children.Remove(b.Body);
-            }
-            else
-            {
-                b.Radius += Radius;
-                IsAlive = false;
-                b.Body.Height = b.Radius * 2;
-                b.Body.Width = b.Radius * 2;
-                parent.Children.Remove(Body);
-            }
-
-            int p = Radius + b.Radius;
-
-
-            Color c1 = (b.Body.Fill as SolidColorBrush).Color;
-            Color c2 = (Body.Fill as SolidColorBrush).Color;
-            Color result = Color.Add(c1, c2);
-            int resR = ((c1.R * b.Radius + c2.R * Radius)) / p;
-            result.R = (byte)resR;
-            int resG = ((c1.G * b.Radius + c2.G * Radius)) / p;
-            result.G = (byte)resG; 
-            int resB = ((c1.B * b.Radius + c2.B * Radius)) / p;
-            result.B = (byte)resB;
-
-            b.Body.Fill = new SolidColorBrush(result);
-            Body.Fill = new SolidColorBrush(result);
-        }
-        async void RepellentInteraction(RepellentBall b)
-        {
-            DX *= -1;
-            DY *= -1;
-            b.Body.Fill = Body.Fill;
-            while(DoIntersect(b))
-            {
-                Location = new Point(Location.X + b.DX, Location.Y + b.DY);
-                await Task.Delay(10);
-            }                        
-        }
-        void MonsterBallInteraction(MonsterBall b)
-        {
-            b.Radius += Radius;
-            b.Body.Height = b.Radius * 2;
-            b.Body.Width = b.Radius * 2;
-            IsAlive = false;
-            parent.Children.Remove(this.Body);
-        }
-    }
-    public class RepellentBall : Ball
-    {
-        public RepellentBall() : base()
-        {
-
-        }
-        public override void InteractWith(Ball b)
-        {
-            if (b.GetType() == typeof(RegularBall))
-            {
-                return;
-            }
-            else if (b.GetType() == typeof(RepellentBall))
-            {
-                RepellentInteraction((RepellentBall)b);
-            }
-            else if (b.GetType() == typeof(MonsterBall))
-            {
-                MonsterBallInteraction((MonsterBall)b);
-            }
-        }
-
-        private void MonsterBallInteraction(MonsterBall b)
-        {
-            Radius /= 2;
-            if(Radius < 1)
-            {
-                IsAlive = false;
-            }
-            Body.Height = Radius * 2;
-            Body.Width = Radius * 2;
-        }
-
-        void RepellentInteraction(RepellentBall b)
-        {
-            (Body.Fill, b.Body.Fill) = (b.Body.Fill, Body.Fill);
-        }
-    }
-    public class MonsterBall : Ball
-    {
-        public MonsterBall() : base()
-        {
-            Body.Fill = Brushes.Black;
-            Speed = 0;
-            DX = 0;
-            DY = 0;
-        }
-        public override void InteractWith(Ball other)
-        {
-
         }
     }
 }
