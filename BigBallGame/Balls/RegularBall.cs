@@ -15,14 +15,14 @@ namespace BigBallGame.Balls
 
         }
         public override async Task InteractWith(Ball b)
-        {           
+        {
             if (b.GetType() == typeof(RegularBall))
             {
                 await RegularInteraction((RegularBall)b);
             }
             else if (b.GetType() == typeof(RepellentBall))
             {
-                await RepellentInteraction((RepellentBall)b); // discard supresses the warning this method needs to run in the background while it keeps interacting with a repellent
+                await RepellentInteraction((RepellentBall)b);
             }
             else if (b.GetType() == typeof(MonsterBall))
             {

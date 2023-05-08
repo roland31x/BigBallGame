@@ -25,7 +25,7 @@ namespace BigBallGame.Balls
         {
             if (b.GetType() == typeof(RegularBall))
             {
-                await b.InteractWith(this);
+                await Task.Run(() => b.InteractWith(this));
             }
             else if (b.GetType() == typeof(RepellentBall))
             {
