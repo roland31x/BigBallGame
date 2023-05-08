@@ -42,7 +42,7 @@ namespace BigBallGame
             if (!Spawned)
             {
                 Spawned = true;
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < 15; i++)
                 {
                     Ball b = new RegularBall();
                     b.Spawn(MainCanvas);

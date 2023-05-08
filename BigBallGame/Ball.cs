@@ -17,6 +17,26 @@ namespace BigBallGame
     public abstract class Ball : IBall
     {
         static readonly Random rng = new Random();
+        public int DXSign 
+        { 
+            get 
+            { 
+                if (DX == 0) 
+                    return 0;  
+                else 
+                    return Math.Abs(DX) / DX; 
+            } 
+        }
+        public int DYSign
+        { 
+            get
+            {
+                if (DY == 0)
+                    return 0;
+                else
+                    return Math.Abs(DY) / DY;
+            }   
+        }
         public int DX { get; set; }
         public int DY { get; set; }
         public int Speed { get; set; }
@@ -90,15 +110,16 @@ namespace BigBallGame
                 Body.Fill = new SolidColorBrush(_color);
             }
         }
-
+        public List<Ball> IntersectingWith { get; set; }
         protected Ball()
         {
+            IntersectingWith = new List<Ball>();
             Body = new Ellipse();
             BColor = Color.FromRgb((byte)rng.Next(10, 250), (byte)rng.Next(10, 250), (byte)rng.Next(10, 250));
             IsAlive = true;
             BallGame.Balls.Add(this);
             Radius = rng.Next(5, 20);
-            Speed = rng.Next(1, 15);
+            Speed = rng.Next(2, 15);
             DX = rng.Next(-Speed, Speed);
             DY = rng.Next(-Speed, Speed);            
         }

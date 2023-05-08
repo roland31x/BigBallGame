@@ -43,11 +43,7 @@ namespace BigBallGame
 
         private static async void Timer_Tick(object? sender, EventArgs e)
         {
-            if (IsChecking)
-            {
-                return;
-            }
-            IsChecking = true;
+            List<Task> tasks = new List<Task>();
             for (int i = 0; i < Balls.Count; i++)
             {
                 if (!Balls[i].IsAlive)
@@ -62,12 +58,13 @@ namespace BigBallGame
                     }
                     if (Balls[i].DoIntersect(Balls[j]))
                     {
-                        await Balls[i].InteractWith(Balls[j]);
+                        var task = Balls[i].InteractWith(Balls[j]);
+                        tasks.Add(task);
                     }
 
                 }
             }
-            IsChecking = false;
+            await Task.WhenAll(tasks);
         }
         public static void Reset()
         {

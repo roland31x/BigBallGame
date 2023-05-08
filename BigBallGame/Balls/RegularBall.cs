@@ -15,14 +15,14 @@ namespace BigBallGame.Balls
 
         }
         public override async Task InteractWith(Ball b)
-        {
+        {           
             if (b.GetType() == typeof(RegularBall))
             {
                 await RegularInteraction((RegularBall)b);
             }
             else if (b.GetType() == typeof(RepellentBall))
             {
-                _ = RepellentInteraction((RepellentBall)b); // discard supresses the warning
+                await RepellentInteraction((RepellentBall)b); // discard supresses the warning this method needs to run in the background while it keeps interacting with a repellent
             }
             else if (b.GetType() == typeof(MonsterBall))
             {
@@ -60,15 +60,25 @@ namespace BigBallGame.Balls
         }
         async Task RepellentInteraction(RepellentBall b)
         {
+            if (IntersectingWith.Contains(b))
+            {
+                return;
+            }
+
+            IntersectingWith.Add(b);
+            b.IntersectingWith.Add(this);
+
             DX *= -1;
             DY *= -1;
             b.BColor = BColor;
             while (DoIntersect(b))
             {
-                Location = new Point(Location.X + b.DX, Location.Y + b.DY);
+                //Location = new Point(Location.X + b.DX, Location.Y + b.DY);
                 await Task.Delay(1);
             }
 
+            IntersectingWith.Remove(b);
+            b.IntersectingWith.Remove(this);
             //return Task.CompletedTask;
         }
         Task MonsterBallInteraction(MonsterBall b)
