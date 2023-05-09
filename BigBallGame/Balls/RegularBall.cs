@@ -22,7 +22,7 @@ namespace BigBallGame.Balls
             }
             else if (b.GetType() == typeof(RepellentBall))
             {
-                _ = RepellentInteraction((RepellentBall)b); // discard supresses the warning
+                await RepellentInteraction((RepellentBall)b);
             }
             else if (b.GetType() == typeof(MonsterBall))
             {
@@ -33,13 +33,13 @@ namespace BigBallGame.Balls
         {
             if (Radius > b.Radius)
             {
-                Radius += b.Radius;
-                b.IsAlive = false;
+                this.IncreaseRadiusBy(b.Radius);
+                b.Die();
             }
             else
             {
-                b.Radius += Radius;
-                IsAlive = false;
+                b.IncreaseRadiusBy(Radius);
+                this.Die();
             }
 
             int p = Radius + b.Radius;
@@ -53,28 +53,38 @@ namespace BigBallGame.Balls
             int resB = ((c1.B * Radius + c2.B * b.Radius)) / p;
             Color result = Color.FromRgb((byte)resR,(byte)resG,(byte)resB);
 
-            b.BColor = result;
-            BColor = result;
+            b.SetBodyColorTo(result);
+            this.SetBodyColorTo(result);
 
             return Task.CompletedTask;
         }
         async Task RepellentInteraction(RepellentBall b)
         {
+            if (IntersectingWith.Contains(b))
+            {
+                return;
+            }
+
+            this.StartsIntersecting(b);
+            b.StartsIntersecting(this);
+
             DX *= -1;
             DY *= -1;
-            b.BColor = BColor;
+            b.SetBodyColorTo(BColor);
             while (DoIntersect(b))
             {
-                Location = new Point(Location.X + b.DX, Location.Y + b.DY);
+                //Location = new Point(Location.X + b.DX, Location.Y + b.DY);
                 await Task.Delay(1);
             }
 
+            this.StopsIntersecting(b);
+            b.StopsIntersecting(this);
             //return Task.CompletedTask;
         }
         Task MonsterBallInteraction(MonsterBall b)
         {
-            b.Radius += Radius;
-            IsAlive = false;
+            b.IncreaseRadiusBy(this.Radius);
+            this.Die();
 
             return Task.CompletedTask;
         }
