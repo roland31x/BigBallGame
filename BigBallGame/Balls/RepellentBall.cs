@@ -13,7 +13,7 @@ namespace BigBallGame.Balls
     public class RepellentBall : Ball
     {
         DispatcherTimer GraceTimer;
-        public bool IsInGracePeriod { get; set; }
+        bool IsInGracePeriod { get; set; }
         public RepellentBall() : base()
         {
             IsInGracePeriod = false;
@@ -25,7 +25,7 @@ namespace BigBallGame.Balls
         {
             if (b.GetType() == typeof(RegularBall))
             {
-                await Task.Run(() => b.InteractWith(this));
+                await b.InteractWith(this);
             }
             else if (b.GetType() == typeof(RepellentBall))
             {
@@ -45,7 +45,7 @@ namespace BigBallGame.Balls
             }
 
             IsInGracePeriod = true;
-            Radius /= 2;
+            this.DivideRadiusBy(2);
             if (Radius < 4)
             {
                 IsAlive = false;
@@ -68,10 +68,12 @@ namespace BigBallGame.Balls
                 return;
             }
 
-            IntersectingWith.Add(b);
-            b.IntersectingWith.Add(this);
+            this.StartsIntersecting(b);
+            b.StartsIntersecting(this);
 
-            (BColor, b.BColor) = (b.BColor, BColor);
+            Color aux = BColor;
+            this.SetBodyColorTo(b.BColor);
+            b.SetBodyColorTo(aux);
             
             while (DoIntersect(b))
             {
@@ -79,8 +81,8 @@ namespace BigBallGame.Balls
                 await Task.Delay(1);
             }
 
-            IntersectingWith.Remove(b);
-            b.IntersectingWith.Remove(this);
+            this.StopsIntersecting(b);
+            b.StopsIntersecting(this);
 
         }
     }

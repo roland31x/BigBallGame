@@ -1,8 +1,10 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Threading;
 using BigBallGame.Balls;
 
@@ -10,7 +12,7 @@ namespace BigBallGame
 {
     public static class BallGame
     {
-        public static List<Ball> Balls = new List<Ball>();
+        static List<Ball> Balls = new List<Ball>();
         static int AliveRegularBalls
         {
             get
@@ -19,12 +21,10 @@ namespace BigBallGame
             }
         }
         static DispatcherTimer Timer = new DispatcherTimer();
-        public static bool IsChecking { get; set; }
         public static async Task PlayGame()
         {
             Timer = new DispatcherTimer() { Interval = TimeSpan.FromMilliseconds(20) };
             Timer.Tick += Timer_Tick;
-            IsChecking = false;
             foreach (Ball b in Balls)
             {
                 if (b.Parent! == null)
@@ -58,7 +58,7 @@ namespace BigBallGame
                     }
                     if (Balls[i].DoIntersect(Balls[j]))
                     {
-                        var task = Balls[i].InteractWith(Balls[j]);
+                        Task task = Balls[i].InteractWith(Balls[j]);
                         tasks.Add(task);
                     }
 
@@ -70,9 +70,21 @@ namespace BigBallGame
         {
             foreach(Ball b in Balls)
             {
-                b.IsAlive = false;
+                b.Die();
             }
             Balls = new List<Ball>();
+        }
+        public static void SpawnBall<T>(Canvas canvas, int x, int y) where T : Ball, new()
+        {
+            Ball spawned = new T();
+            Balls.Add(spawned);
+            spawned.Spawn(canvas);
+        }
+        public static void SpawnBall<T>(Canvas canvas) where T : Ball, new()
+        {
+            Ball spawned = new T();
+            Balls.Add(spawned);
+            spawned.Spawn(canvas);           
         }
     }
 }

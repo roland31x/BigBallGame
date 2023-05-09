@@ -44,18 +44,15 @@ namespace BigBallGame
                 Spawned = true;
                 for (int i = 0; i < 15; i++)
                 {
-                    Ball b = new RegularBall();
-                    b.Spawn(MainCanvas);
+                    BallGame.SpawnBall<RegularBall>(MainCanvas);
                 }
                 for (int i = 0; i < 5; i++)
                 {
-                    Ball b = new RepellentBall();
-                    b.Spawn(MainCanvas);
+                    BallGame.SpawnBall<RepellentBall>(MainCanvas);
                 }
                 for (int i = 0; i < 1; i++)
                 {
-                    Ball b = new MonsterBall();
-                    b.Spawn(MainCanvas);
+                    BallGame.SpawnBall<MonsterBall>(MainCanvas);
                 }
                 await Task.Delay(100);
             }           

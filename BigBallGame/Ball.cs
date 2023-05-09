@@ -37,9 +37,9 @@ namespace BigBallGame
                     return Math.Abs(DY) / DY;
             }   
         }
-        public int DX { get; set; }
-        public int DY { get; set; }
-        public int Speed { get; set; }
+        public int DX { get; protected set; }
+        public int DY { get; protected set; }
+        public int Speed { get; protected set; }
         int _radius;
         public int Radius 
         { 
@@ -47,7 +47,7 @@ namespace BigBallGame
             { 
                 return _radius; 
             } 
-            set 
+            protected set 
             { 
                 _radius = value;
 
@@ -63,7 +63,7 @@ namespace BigBallGame
             { 
                 return _alive; 
             } 
-            set 
+            protected set 
             { 
                 _alive = value;
 
@@ -75,8 +75,8 @@ namespace BigBallGame
             } 
         }
         // UI stuff for wpf
-        public Ellipse Body { get; set; }
-        public Canvas? Parent { get; set; }
+        public Ellipse Body { get; protected set; }
+        public Canvas? Parent { get; protected set; }
         //
 
         Point _location;
@@ -86,7 +86,7 @@ namespace BigBallGame
             { 
                 return _location; 
             } 
-            set 
+            protected set 
             { 
                 _location = value;
 
@@ -95,14 +95,14 @@ namespace BigBallGame
                 Canvas.SetLeft(Body, _location.X - _radius); 
             } 
         }
-        public Color _color;
+        Color _color;
         public Color BColor 
         { 
             get 
             { 
                 return _color; 
             }
-            set
+            protected set
             {
                 _color = value;
 
@@ -110,14 +110,13 @@ namespace BigBallGame
                 Body.Fill = new SolidColorBrush(_color);
             }
         }
-        public List<Ball> IntersectingWith { get; set; }
+        protected List<Ball> IntersectingWith { get; set; }
         protected Ball()
         {
             IntersectingWith = new List<Ball>();
             Body = new Ellipse();
             BColor = Color.FromRgb((byte)rng.Next(10, 250), (byte)rng.Next(10, 250), (byte)rng.Next(10, 250));
             IsAlive = true;
-            BallGame.Balls.Add(this);
             Radius = rng.Next(5, 20);
             Speed = rng.Next(2, 15);
             DX = rng.Next(-Speed, Speed);
@@ -192,6 +191,42 @@ namespace BigBallGame
         protected double GetDist(Ball other)
         {
             return Math.Sqrt((Location.X - other.Location.X) * (Location.X - other.Location.X) + (Location.Y - other.Location.Y) * (Location.Y - other.Location.Y));
+        }
+        public void Die()
+        {
+            IsAlive = false;
+        }
+        public void IncreaseRadiusBy(int radius)
+        {
+            Radius += radius;
+        }
+        public void DecreaseRadiusBy(int radius)
+        {
+            Radius -= radius;
+        }
+        public void MultiplyRadiusBy(int amount)
+        {
+            Radius *= amount;
+        }
+        public void DivideRadiusBy(int amount)
+        {
+            Radius /= amount;
+        }
+        public void SetBodyColorTo(Color color)
+        {
+            BColor = color;
+        }
+        public void StartsIntersecting(Ball other)
+        {
+            IntersectingWith.Add(other);
+        }
+        public void StopsIntersecting(Ball other)
+        {
+            IntersectingWith.Remove(other);
+        }
+        public void OverrideLocation(Point p)
+        {
+            Location = p;
         }
     }
 }

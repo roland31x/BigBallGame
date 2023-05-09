@@ -33,13 +33,13 @@ namespace BigBallGame.Balls
         {
             if (Radius > b.Radius)
             {
-                Radius += b.Radius;
-                b.IsAlive = false;
+                this.IncreaseRadiusBy(b.Radius);
+                b.Die();
             }
             else
             {
-                b.Radius += Radius;
-                IsAlive = false;
+                b.IncreaseRadiusBy(Radius);
+                this.Die();
             }
 
             int p = Radius + b.Radius;
@@ -53,8 +53,8 @@ namespace BigBallGame.Balls
             int resB = ((c1.B * Radius + c2.B * b.Radius)) / p;
             Color result = Color.FromRgb((byte)resR,(byte)resG,(byte)resB);
 
-            b.BColor = result;
-            BColor = result;
+            b.SetBodyColorTo(result);
+            this.SetBodyColorTo(result);
 
             return Task.CompletedTask;
         }
@@ -65,26 +65,26 @@ namespace BigBallGame.Balls
                 return;
             }
 
-            IntersectingWith.Add(b);
-            b.IntersectingWith.Add(this);
+            this.StartsIntersecting(b);
+            b.StartsIntersecting(this);
 
             DX *= -1;
             DY *= -1;
-            b.BColor = BColor;
+            b.SetBodyColorTo(BColor);
             while (DoIntersect(b))
             {
                 //Location = new Point(Location.X + b.DX, Location.Y + b.DY);
                 await Task.Delay(1);
             }
 
-            IntersectingWith.Remove(b);
-            b.IntersectingWith.Remove(this);
+            this.StopsIntersecting(b);
+            b.StopsIntersecting(this);
             //return Task.CompletedTask;
         }
         Task MonsterBallInteraction(MonsterBall b)
         {
-            b.Radius += Radius;
-            IsAlive = false;
+            b.IncreaseRadiusBy(this.Radius);
+            this.Die();
 
             return Task.CompletedTask;
         }
