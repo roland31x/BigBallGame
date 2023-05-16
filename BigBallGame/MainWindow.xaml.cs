@@ -68,5 +68,10 @@ namespace BigBallGame
                 Started = false;
             }
         }
+
+        private void Abort_Click(object sender, RoutedEventArgs e)
+        {
+            BallGame.Reset();
+        }
     }
 }

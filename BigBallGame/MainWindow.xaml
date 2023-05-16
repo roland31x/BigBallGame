@@ -15,6 +15,7 @@
 
             </Canvas>
             <Button Height="22" Width="96" HorizontalAlignment="Center" Canvas.Left="552" VerticalAlignment="Top" Content="Play" Click="Button_Click" Canvas.Top="2"/>
+            <Button Height="22" Width="96" Canvas.Left="1094" Content="Abort" Click="Abort_Click" Canvas.Top="2" HorizontalAlignment="Left" VerticalAlignment="Center"/>
         </Canvas>
 
     </Grid>
